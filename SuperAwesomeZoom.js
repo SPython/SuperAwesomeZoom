@@ -1,9 +1,9 @@
 /**
  * Create ZoomNav object
  * @param {Object} parameters - Parameters
- * @param {Element} parameters.zoomContainer - Element, inside which all zoom is happening
+ * @param {Element|String|jQuery} parameters.zoomContainer - Element, inside which all zoom is happening
  * @param {Array} [zoomContainerSize] - Container size
- * @param {Element} parameters.zoomedImage Zoomed image to be scrolled
+ * @param {Element|String|jQuery} parameters.zoomedImage Zoomed image to be scrolled
  * @param {Array} [zoomedImageSize] - Zoomed image size
  * @param {Number} [parameters.marginX=0] - Empty area in pixels at the left and the right of the zoomContainer
  * @param {Number} [parameters.marginY=0] - Empty area in pixels at the top and the bottom of the zoomContainer
@@ -16,8 +16,23 @@
  * @param {String} [movementMethod='translate3d'] - Image movement method. Can be 'translate3d' or 'lefttop'
  */
 function SuperAwesomeZoom(parameters) {
-    this.zoomContainer = parameters.zoomContainer;
-    this.zoomedImage = parameters.zoomedImage;
+    if (typeof parameters.zoomContainer == "string") {
+        this.zoomContainer = document.querySelector(parameters.zoomContainer);
+    } else if (jQuery !== undefined && parameters.zoomContainer instanceof jQuery) {
+        this.zoomContainer = parameters.zoomContainer.get(0);
+    }
+    else {
+        this.zoomContainer = parameters.zoomContainer;
+    }
+    
+    if (typeof parameters.zoomedImage == "string") {
+        this.zoomedImage = document.querySelector(parameters.zoomedImage);
+    } else if (jQuery !== undefined && parameters.zoomedImage instanceof jQuery) {
+        this.zoomedImage = parameters.zoomedImage.get(0);
+    }
+    else {
+        this.zoomedImage = parameters.zoomedImage;
+    }
     
     this.movementMethod = parameters.movementMethod || 'translate3d';
     
@@ -158,7 +173,17 @@ function SuperAwesomeZoom(parameters) {
         moveElement(self.zoomedImage, newImageX, newImageY, self.movementMethod);
     };
     
+    /**
+     * Add click handler
+     * @param {Element|String|jQuery} element
+     */
     this.addClickHandler = function(element) {
+        if (typeof element == "string") {
+            var element = document.querySelector(element);
+        } else if (jQuery !== undefined && element instanceof jQuery) {
+            var element = element.get(0);
+        }
+        
         element.addEventListener('click', self.clickHandler);
     };
     
@@ -188,6 +213,10 @@ function SuperAwesomeZoom(parameters) {
     this.addMousemoveHandler = function() {
         this.zoomContainer.addEventListener('mousemove', self.mousemoveHandler);
     };
+    
+    this.addMousemoveHandler();
+    this.addResizeHandler();
+    this.addZoomContainerClickHandler();
 }
 
 /**
